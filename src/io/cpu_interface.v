@@ -39,7 +39,6 @@ module cpu_interface(
     input [3:0] dmem_byte_w_en,
     input clk_for_ddr,
     input pixel_clk,
-    input manual_clk,
 
     output ui_clk,
     output reg [31:0] instr_data_out,
@@ -273,14 +272,21 @@ loader_mem loader (         // use dual port Block RAM
 );
 
 vga #(
-    .DATA_ADDR_WIDTH( 15 )
+    .DATA_ADDR_WIDTH( 15 ),
+    .h_disp         (1680),
+    .h_front        (104 ),
+    .h_sync         (184 ),
+    .h_back         (288 ),
+    .v_disp         (1050),
+    .v_front        ( 1  ),
+    .v_sync         ( 3  ),
+    .v_back         ( 33 )
 ) vga0 (
     .RESET      ( rst            ),
     .DATA_ADDR  ( vga_addr[14:0] ),
     .DATA_IN    ( char_to_vga    ),
     .WR_EN      ( vga_wen        ),
     .pixel_clk  ( pixel_clk      ),
-    .cpu_clk    ( text_mem_clk   ),
     .VGA_R      ( VGA_R          ),
     .VGA_G      ( VGA_G          ),
     .VGA_B      ( VGA_B          ),

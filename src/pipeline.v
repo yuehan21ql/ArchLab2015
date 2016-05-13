@@ -14,7 +14,6 @@ module pipeline (
     input [7:0] SW,
     input SLOW,
     input clk_from_board,         // the global clock
-    input manual_clk,
     input reset,       // the global reset
     input [3:0] debug_sel,
     //input [7:0] intr,   // 8 hardware interruption
@@ -901,7 +900,6 @@ cpu_interface inst_ci (
     .dmem_byte_w_en ( mem_mem_byte_w_en     ),
     .clk_for_ddr    ( clk_from_board        ), // 100 MHz
     .pixel_clk      ( clk_pixel             ),
-    .manual_clk     ( manual_clk            ),
 
     .ui_clk         ( ui_clk_from_ddr       ),
     .instr_data_out ( ic_data_out           ),
@@ -912,7 +910,7 @@ cpu_interface inst_ci (
 );
 
 reg clk_slow; // 5MHz
-reg [25:0] clk_counter;
+reg [24:0] clk_counter;
 
 always @ (posedge ui_clk_from_ddr) begin
     if (reset) begin
@@ -930,8 +928,7 @@ end
 ddr_clock_gen dcg0 (
     .clk_in1    (clk_from_board),
     .clk_out1   (clk_from_ip),
-    .clk_out2   (clk_pixel),
-    .clk_out3   ()
+    .clk_out2   (clk_pixel)
 );
 
 reg [31:0] hex_to_seg;
