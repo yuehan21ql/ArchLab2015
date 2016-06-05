@@ -231,6 +231,9 @@ always @(posedge ui_clk) begin
         if (ram_en) begin
             app_en <= app_en_next;
         end
+        else begin
+            ddr_ctrl_status <= ddr_ctrl_status_next;
+        end
         if (go & ram_en) begin
             last_addr <= ram_addr;
             case (ddr_ctrl_status)

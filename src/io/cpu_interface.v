@@ -119,6 +119,7 @@ reg [5:0] dbg_que_start;
 reg [5:0] dbg_que_end;
 reg dbg_status;
 reg [6:0] miss_count;
+reg cache_stall_last;
 wire [2:0] ddr_ctrl_status;
 
 wire [127:0] que_input = {
@@ -177,6 +178,11 @@ wire text_mem_clk = ui_clk;  // The clock driving text memory
 
 always @ (posedge ui_clk) begin
     sync_manual_clk <= manual_clk;
+end
+
+initial begin
+    vga_wen <= 0;
+    vga_stall_cnt <= 0;
 end
 
 always @ (posedge text_mem_clk) begin
@@ -424,19 +430,23 @@ initial begin
     dbg_que_start <= 0;
     dbg_que_end <= 0;
     miss_count <= 0;
+    cache_stall_last <= 1;
 end
 
-always @ (posedge cache_stall) begin
-    miss_count <= miss_count + 1;
-end
 
 always @ (negedge clk_pipeline) begin
     if (!rst) begin
+        miss_count <= 0;
         dbg_status <= 0;
         dbg_que_start <= 0;
         dbg_que_end <= 0;
+        cache_stall_last <= 1;
     end
     else begin
+        if (cache_stall != cache_stall_last) begin
+            miss_count <= miss_count + 1;
+            cache_stall_last <= ~cache_stall_last;
+        end
         if (!cache_stall) begin
             dbg_status <= 0; // update start only if status = 0
         end

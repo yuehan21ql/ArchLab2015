@@ -87,7 +87,7 @@ always @(*) begin
             // I-cache 写入控制设定
             ic_enable_reg = 1;
             ic_cmp_reg = 0;
-            ic_write_reg = 1;
+            ic_write_reg = 0;
             ic_byte_w_en_reg = 4'b1111;
 
             // I-cache 写入内容设定
@@ -119,6 +119,8 @@ always @(*) begin
                 counter_next_reg = 0;
             end
             else begin
+                ram_en_out = 0;
+                ic_write_reg = 1;
                 status_next_reg = `STAT_IC_MISS;
                 counter_next_reg = counter_in + `N_WORDS;
             end
@@ -136,7 +138,7 @@ always @(*) begin
             // 写 D-cache
             dc_enable_reg = 1;
             dc_cmp_reg = 0;
-            dc_write_reg = 1;
+            dc_write_reg = 0;
             dc_valid_reg = 1;
             dc_word_sel_reg = counter_in;
             dc_byte_w_en_reg = 4'b1111;
@@ -151,6 +153,8 @@ always @(*) begin
                 counter_next_reg = 0;
             end
             else begin
+                dc_write_reg = 1;
+                ram_en_out = 0;
                 status_next_reg = `STAT_DC_MISS;
                 counter_next_reg = counter_in + `N_WORDS;
             end
@@ -192,7 +196,7 @@ always @(*) begin
             // 写 I-cache
             ic_enable_reg = 1;
             ic_cmp_reg = 0;
-            ic_write_reg = 1;
+            ic_write_reg = 0;
             ic_byte_w_en_reg = 4'b1111;
 
             ic_valid_reg = 1;
@@ -222,6 +226,8 @@ always @(*) begin
             end
 
             else begin
+                ram_en_out = 0;
+                ic_write_reg = 1;
                 status_next_reg = `STAT_DOUBLE_MISS;
                 counter_next_reg = counter_in + `N_WORDS;
             end
