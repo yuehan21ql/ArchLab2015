@@ -47,7 +47,7 @@ input dc_hit_in;
 input dc_dirty_in;
 input dc_valid_in;
 input [2:0] status_in;
-input [2:0] counter_in;
+input counter_in;
 input [2:0] ic_word_sel_in;
 input [2:0] dc_word_sel_in;
 input [3:0] dc_byte_w_en_in;
@@ -66,7 +66,7 @@ output reg ram_en_out;
 output reg ram_write_out;
 output reg [1:0] ram_addr_sel_reg;
 output reg [2:0] status_next_reg;
-output reg [2:0] counter_next_reg;
+output reg counter_next_reg;
 output reg [2:0] ic_word_sel_reg;
 output reg [2:0] dc_word_sel_reg;
 output reg [3:0] ic_byte_w_en_reg;
@@ -114,15 +114,15 @@ always @(*) begin
             ram_addr_sel_reg = 2'b00;  // 高位表示是否写回，低位表示是 ic 还是 dc
             ram_write_out = 0;
 
-            if(counter_in ==  3'd4) begin
+            if(counter_in ==  1) begin
+                ram_en_out = 0;
+                ic_write_reg = 1;
                 status_next_reg = `STAT_NORMAL;
                 counter_next_reg = 0;
             end
             else begin
-                ram_en_out = 0;
-                ic_write_reg = 1;
                 status_next_reg = `STAT_IC_MISS;
-                counter_next_reg = counter_in + `N_WORDS;
+                counter_next_reg = 1;
             end
         end
         `STAT_DC_MISS:
@@ -148,15 +148,15 @@ always @(*) begin
             ram_en_out = 1;
             ram_write_out = 0;
 
-            if(counter_in ==  3'd4) begin
+            if(counter_in ==  1) begin
+                ram_en_out = 0;
+                dc_write_reg = 1;
                 status_next_reg = `STAT_NORMAL;
                 counter_next_reg = 0;
             end
             else begin
-                dc_write_reg = 1;
-                ram_en_out = 0;
                 status_next_reg = `STAT_DC_MISS;
-                counter_next_reg = counter_in + `N_WORDS;
+                counter_next_reg = 1;
             end
         end
         `STAT_DC_MISS_D:
@@ -182,14 +182,8 @@ always @(*) begin
             ram_en_out = 1;
             ram_write_out = 1;
 
-            if(counter_in == `COUNT_FINISH) begin
-                status_next_reg = `STAT_DC_MISS;
-                counter_next_reg = 3'd0;  // Restart counter for D-cache loading
-            end
-            else begin
-                status_next_reg = `STAT_DC_MISS_D;
-                counter_next_reg = counter_in + `N_WORDS;
-            end
+            status_next_reg = `STAT_DC_MISS;
+            counter_next_reg = 0;
         end
         `STAT_DOUBLE_MISS:
         begin
@@ -220,16 +214,16 @@ always @(*) begin
             else begin
                 ram_en_out = 1;
             end
-            if(counter_in ==  3'd4) begin
+
+            if(counter_in ==  1) begin
+                ram_en_out = 0;
+                ic_write_reg = 1;
                 status_next_reg = `STAT_DC_MISS;
                 counter_next_reg = 0;  // Restart counter for D-cache loading
             end
-
             else begin
-                ram_en_out = 0;
-                ic_write_reg = 1;
                 status_next_reg = `STAT_DOUBLE_MISS;
-                counter_next_reg = counter_in + `N_WORDS;
+                counter_next_reg = 1;
             end
         end
         `STAT_DOUBLE_MISS_D:
@@ -255,14 +249,8 @@ always @(*) begin
             ram_en_out = 1;
             ram_write_out = 1;
 
-            if(counter_in == `COUNT_FINISH) begin
-                status_next_reg = `STAT_DOUBLE_MISS;
-                counter_next_reg = 0;  // Restart counter for I-cache loading
-            end
-            else begin
-                status_next_reg = `STAT_DOUBLE_MISS_D;
-                counter_next_reg = counter_in + `N_WORDS;
-            end
+            status_next_reg = `STAT_DOUBLE_MISS;
+            counter_next_reg = 0;  // Restart counter for I-cache loading
         end
         default: /*normal*/
         begin

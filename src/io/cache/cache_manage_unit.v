@@ -55,7 +55,6 @@ module cache_manage_unit #(
     // debug
     output reg  [2:0] status,
     // Cache 当前状态，表明 cache 是否*已经*发生缺失以及缺失类型，具体取值参见 status.vh.
-    output reg  [2:0] counter,
     // 块内偏移指针/迭代器，用于载入块时逐字写入。
 
     // To RAM
@@ -67,7 +66,8 @@ module cache_manage_unit #(
 
 wire [2:0] status_next;  // 由 cache control 生成的次态信号。
 
-wire [2:0] counter_next; // 由 cache control 决定的下一周期迭代器的值。
+reg counter;
+wire counter_next; // 由 cache control 决定的下一周期迭代器的值。
 
 reg write_after_load;    // 标记导致阻塞的是否是写操作，是的话，要多阻塞一个周期完成写入。
 
@@ -125,9 +125,9 @@ assign dc_offset   =  dc_addr[OFFSET_WIDTH - 1 : 0];
 //   00: ram_addr_ic
 //   01: ram_addr_dc
 //   1x: ram_addr_dc_wb
-assign ram_addr_ic    = {tag_to_ic,   index_to_ic, counter};
-assign ram_addr_dc    = {tag_to_dc,   index_to_dc, counter};
-assign ram_addr_dc_wb = {tag_from_dc, index_to_dc ,counter};  // write back
+assign ram_addr_ic    = {tag_to_ic,   index_to_ic, 3'd0};
+assign ram_addr_dc    = {tag_to_dc,   index_to_dc, 3'd0};
+assign ram_addr_dc_wb = {tag_from_dc, index_to_dc ,3'd0};  // write back
 assign ram_addr_out = ram_addr_sel[1] ? ram_addr_dc_wb
                                       : (ram_addr_sel[0] ? ram_addr_dc : ram_addr_ic);
 
@@ -235,6 +235,12 @@ cache_2ways dc (
     .data_out      ( word_from_dc    ),
     .data_wb       ( block_from_dc   )
 );
+
+initial begin
+    status <= `STAT_NORMAL;
+    counter <= 0;
+    write_after_load <= 0;
+end
 
 // 状态转移逻辑
 always @(posedge clk) begin

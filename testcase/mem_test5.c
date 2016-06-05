@@ -13,7 +13,7 @@
 
 #define deref(x) *((volatile unsigned int *) (x))
 
-#define screen_width 210
+#define screen_width 160
 
 char* vga = VMEM + screen_width*2 + 5;
 

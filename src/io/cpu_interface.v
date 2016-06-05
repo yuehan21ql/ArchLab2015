@@ -105,7 +105,6 @@ reg [7:0] char_to_vga;
 wire [127:0] data_from_mig;
 
 wire [2:0] cache_status;
-wire [2:0] cache_counter;
 wire mig_rdy;
 wire mig_wdf_rdy;
 wire mig_ddr_inited;
@@ -134,7 +133,7 @@ wire [127:0] que_input = {
     addr_to_mig,
 
     cache_status,
-    cache_counter,
+    3'd0,
     mig_rdy,
     mig_wdf_rdy,
     mig_ddr_inited,
@@ -318,7 +317,6 @@ cache_manage_unit u_cm_0 (
     .ic_data_out     ( ic_data_out          ),
 
     .status          ( cache_status         ),
-    .counter         ( cache_counter        ),
     .ram_en_out      ( ram_en               ),
     .ram_write_out   ( ram_write            ),
     .ram_addr_out    ( ram_addr             ),
